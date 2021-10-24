@@ -256,7 +256,7 @@ class QuantumCircuit3:
         c = ydata.mean()
         fit_params, *_ = curve_fit(fun, amps, ydata, [period, a, b, c])
 
-        # Update frequency estimate
+        # Update amplitude estimate
         self.pi_amp_01 = abs( (np.pi + fit_params[2]) * fit_params[0]/(2*np.pi) )
 
         print(f'pi_amp_01 updated from {amp0} to {self.pi_amp_01}.')
@@ -379,7 +379,7 @@ class QuantumCircuit3:
         c = ydata.mean()
         fit_params, *_ = curve_fit(fun, amps, ydata, [period, a, b, c])
 
-        # Update frequency estimate
+        # Update amplitude estimate
         self.pi_amp_12 = abs( (np.pi + fit_params[2]) * fit_params[0]/(2*np.pi) )
 
         print(f'pi_amp_12 updated from {amp0} to {self.pi_amp_12}.')
