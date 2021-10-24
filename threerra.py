@@ -394,31 +394,45 @@ class QuantumCircuit3:
 
         print(f'pi_amp_12 updated from {amp0} to {self.pi_amp_12}.')
 
-    def compile(self):
+    def draw(self, backend=None, *args, **kwargs):
         """
         Join all pulses and draw
         """
-        schedule = pulse.Schedule(name='')
+
+        # Default backend
+        if backend is None:
+            backend = self.backend
+
+        # Join pulses
+        schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
-        return schedule.draw(backend=self.backend)
 
-    def run(self):
+        return schedule.draw(backend=backend,
+                             *args,
+                             **kwargs)
+    
+    def run(self,
+            shots=1024,
+            meas_level=2,
+            meas_return='avg',
+            *args, **kwargs):
         """
-        Join all pulses and draw
+        Run circuit on backend
         """
-        schedule = pulse.Schedule(name='')
+
+        schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
-        schedule.draw(backend=self.backend)
-
+        
         job = self.backend.run(schedule,
-                               meas_level=2,
-                               meas_return='avg',
-                               shots=1024)
+                               shots=shots,
+                               meas_level=meas_level,
+                               meas_return=meas_return,
+                               *args,
+                               **kwargs)
 
         # Make notice about the on-going job
-        print("default measure")
         job_monitor(job)
         results = job.result(timeout=120)
         return results
