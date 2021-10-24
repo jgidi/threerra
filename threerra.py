@@ -392,3 +392,32 @@ class QuantumCircuit3:
         for s in self.list_schedule:
             schedule |= s << schedule.duration
         return schedule.draw(backend=self.backend)
+    
+    def run(self):
+        """
+        Join all pulses and draw
+        """
+        schedule = pulse.Schedule(name='')
+        for s in self.list_schedule:
+            schedule |= s << schedule.duration
+        schedule.draw(backend=self.backend)
+        
+        job = self.backend.run(schedule,
+                               meas_level=2,
+                               meas_return='avg',
+                               shots=1024)
+
+        # Make notice about the on-going job
+        print("default measure")
+        job_monitor(job)
+        results = job.result(timeout=120)
+        return results
+
+    def measure(self):
+        meas_idx = [self.qubit in group
+                        for group in self.backend_config.meas_map].index(True)
+        measure_pulse = self.backend_defaults.instruction_schedule_map.get(
+            'measure',
+            qubits = self.backend_config.meas_map[meas_idx],
+            )
+        self.list_schedule.append(measure_pulse)
