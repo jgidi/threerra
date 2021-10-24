@@ -51,7 +51,7 @@ class QuantumCircuit3:
         self.pi_amp_01 = 0.1556930479027419
         # 12
         self.qubit_freq_est_12 = self.qubit_freq_est_01 + self.backend_props.qubit_property(self.qubit)['anharmonicity'][0]
-        self.pi_amp_12 = 0.37256049920143336
+        self.pi_amp_12 = 0.2797548240848574
 
         # Channels
         self.drive_chan = pulse.DriveChannel(self.qubit)
