@@ -108,6 +108,16 @@ class QuantumCircuit3:
                                          name='x_01')
         self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
 
+    def rx_01(self, angle):
+        """
+        Apply a pi pulse on levels 01
+        """
+        pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
+                                         amp=self.pi_amp_01*angle/np.pi,
+                                         sigma=self.drive_sigma,
+                                         name='x_01')
+        self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
+
 
     def y_01(self):
         """
