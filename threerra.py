@@ -423,7 +423,6 @@ class QuantumCircuit3:
                                **kwargs)
 
         # Make notice about the on-going job
-        print("default measure")
         job_monitor(job)
         results = job.result(timeout=120)
         return results
