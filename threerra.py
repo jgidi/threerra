@@ -402,19 +402,25 @@ class QuantumCircuit3:
                              *args,
                              **kwargs)
     
-    def run(self):
+    def run(self,
+            shots=1024,
+            meas_level=2,
+            meas_return='avg',
+            *args, **kwargs):
         """
-        Join all pulses and draw
+        Run circuit on backend
         """
-        schedule = pulse.Schedule(name='')
+
+        schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
-        schedule.draw(backend=self.backend)
         
         job = self.backend.run(schedule,
-                               meas_level=2,
-                               meas_return='avg',
-                               shots=1024)
+                               shots=shots,
+                               meas_level=meas_level,
+                               meas_return=meas_return,
+                               *args,
+                               **kwargs)
 
         # Make notice about the on-going job
         print("default measure")
