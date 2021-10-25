@@ -111,11 +111,12 @@ class QuantumCircuit3:
     def rx_01(self, angle):
         """
         Apply a pi pulse on levels 01
+                input: it has to be in randians
         """
         pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
                                          amp=self.pi_amp_01*angle/np.pi,
                                          sigma=self.drive_sigma,
-                                         name='x_01')
+                                         name='rx_01')
         self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
 
 
@@ -129,6 +130,20 @@ class QuantumCircuit3:
                                          amp=self.pi_amp_01,
                                          sigma=self.drive_sigma,
                                          name='y_01')
+        pulse_y_01 = pulse.Play(y_01, self.drive_chan)
+        self.list_schedule.append(pulse_y_01)
+
+    def ry_01(self, angle):
+        """
+        Apply a y gate on levels 01
+                input: it has to be in randians
+        """
+        phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
+        self.list_schedule.append(phase_pi)
+        y_01 = pulse_lib.gaussian(duration=self.drive_samples,
+                                         amp=self.pi_amp_01*angle/np.pi,
+                                         sigma=self.drive_sigma,
+                                         name='ry_01')
         pulse_y_01 = pulse.Play(y_01, self.drive_chan)
         self.list_schedule.append(pulse_y_01)
 
@@ -411,7 +426,7 @@ class QuantumCircuit3:
         return schedule.draw(backend=backend,
                              *args,
                              **kwargs)
-    
+
     def run(self,
             shots=1024,
             meas_level=2,
@@ -424,7 +439,7 @@ class QuantumCircuit3:
         schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
-        
+
         job = self.backend.run(schedule,
                                shots=shots,
                                meas_level=meas_level,
