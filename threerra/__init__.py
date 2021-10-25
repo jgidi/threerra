@@ -181,21 +181,6 @@ class QuantumCircuit3:
         self.list_schedule.append(pulse.Play(pi_pulse_12, self.drive_chan))
 
 
-    def sx_12(self):
-        """
-        Apply a pi/2 pulse on levels 12
-        """
-        pi_half_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
-                                              amp=self.pi_amp_12/2,
-                                              sigma=self.drive_sigma,
-                                              name='sx_12')
-        # make sure this pulse is sidebanded
-        pi_half_pulse_12 = self.apply_sideband(pi_half_pulse_12,
-                                               self.qubit_freq_est_12,
-                                               name='sx_12')
-        self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
-
-
     def ry_12(self, angle):
         """
         Apply a ry gate on levels 12
