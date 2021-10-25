@@ -11,6 +11,7 @@ from scipy.optimize import curve_fit
 
 from threerra.discriminators import LDA_discriminator
 from threerra.tools import closest_multiple
+from threerra.units import ns, MHz, GHz
 
 
 class QuantumCircuit3:
@@ -21,12 +22,6 @@ class QuantumCircuit3:
         self.qubit = 0
         self.mem_slot = 0
 
-        # Conversion from SI units
-        self.ns = 1.0e-9 # Nanoseconds
-        self.us = 1.0e-6 # Microseconds
-        self.MHz = 1.0e6 # Megahertz
-        self.GHz = 1.0e9 # Gigahertz
-
         # Backend
         self.backend = backend
         self.backend_props    = self.backend.properties()
@@ -34,7 +29,7 @@ class QuantumCircuit3:
         self.backend_defaults = self.backend.defaults()
 
         # Drive pulse parameters
-        self.drive_sigma_s = 40 * self.ns           # Width (duration) of gaussian pulses in microseconds # TODO use 80 ns (0.080 us)
+        self.drive_sigma_s = 40 * ns           # Width (duration) of gaussian pulses in microseconds # TODO use 80 ns (0.080 us)
         self.drive_samples_s = self.drive_sigma_s*4 # Truncate gaussian duration
 
         self.dt = self.backend_config.dt # Device sampling period
@@ -243,7 +238,7 @@ class QuantumCircuit3:
 
         f0 = self.qubit_freq_est_01
         if freqs is None:
-            freqs = f0 + np.linspace(-20*self.MHz, 20*self.MHz, 75)
+            freqs = f0 + np.linspace(-20*MHz, 20*MHz, 75)
 
         meas_idx = [self.qubit in group
                         for group in self.backend_config.meas_map].index(True)
@@ -285,7 +280,7 @@ class QuantumCircuit3:
         # Update frequency estimate
         self.qubit_freq_est_01 = fit_params[0]
 
-        print(f'qubit_freq_est_01 updated from {f0/self.GHz}GHz to {fit_params[0]/self.GHz}GHz.')
+        print(f'qubit_freq_est_01 updated from {f0/GHz}GHz to {fit_params[0]/GHz}GHz.')
 
         
     def calibrate_pi_amp_01(self, amps=None):
@@ -348,7 +343,7 @@ class QuantumCircuit3:
 
         f0 = self.qubit_freq_est_12
         if freqs is None:
-            freqs = f0 + np.linspace(-20*self.MHz, 20*self.MHz, 75)
+            freqs = f0 + np.linspace(-20*MHz, 20*MHz, 75)
 
         meas_idx = [self.qubit in group
                         for group in self.backend_config.meas_map].index(True)
@@ -401,7 +396,7 @@ class QuantumCircuit3:
         # Update frequency estimate
         self.qubit_freq_est_12 = fit_params[0]
 
-        print(f'qubit_freq_est_12 updated from {f0/self.GHz}GHz to {fit_params[0]/self.GHz}GHz.')
+        print(f'qubit_freq_est_12 updated from {f0/GHz}GHz to {fit_params[0]/GHz}GHz.')
 
         
     def calibrate_pi_amp_12(self, amps=None):
