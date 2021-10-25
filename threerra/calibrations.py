@@ -5,10 +5,11 @@ import qiskit.pulse as pulse
 import qiskit.pulse.library as pulse_lib
 from qiskit.tools.monitor import job_monitor
 from scipy.optimize import curve_fit
+from threerra import QuantumCircuit3
 
 from threerra.units import MHz, GHz
 
-def calibrate_freq_01(self, freqs=None):
+def calibrate_freq_01(self : QuantumCircuit3, freqs=None):
 
     f0 = self.qubit_freq_est_01
     if freqs is None:
@@ -57,7 +58,7 @@ def calibrate_freq_01(self, freqs=None):
     print(f'qubit_freq_est_01 updated from {f0/GHz}GHz to {fit_params[0]/GHz}GHz.')
     
     
-def calibrate_pi_amp_01(self, amps=None):
+def calibrate_pi_amp_01(self : QuantumCircuit3, amps=None):
 
     amp0 = self.pi_amp_01
     if amps is None:
@@ -113,7 +114,7 @@ def calibrate_pi_amp_01(self, amps=None):
 
     print(f'pi_amp_01 updated from {amp0} to {self.pi_amp_01}.')
 
-def calibrate_freq_12(self, freqs=None):
+def calibrate_freq_12(self : QuantumCircuit3, freqs=None):
 
     f0 = self.qubit_freq_est_12
     if freqs is None:
@@ -173,7 +174,7 @@ def calibrate_freq_12(self, freqs=None):
     print(f'qubit_freq_est_12 updated from {f0/GHz}GHz to {fit_params[0]/GHz}GHz.')
 
 
-def calibrate_pi_amp_12(self, amps=None):
+def calibrate_pi_amp_12(self : QuantumCircuit3, amps=None):
 
     amp0 = self.pi_amp_12
     if amps is None:
