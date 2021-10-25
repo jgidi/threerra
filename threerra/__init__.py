@@ -9,15 +9,8 @@ from qiskit.tools.monitor import job_monitor
 from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 from scipy.optimize import curve_fit
 
-
-# Out-of-class helpers
-def closest_multiple(N, base : int = 16):
-    """
-    Return the closest multiple of 'base' to 'N'
-    """
-    return base * round( N / base )
-
 from threerra.discriminators import LDA_discriminator
+from threerra.tools import closest_multiple
 
 
 class QuantumCircuit3:
