@@ -22,7 +22,7 @@ def reshape_complex_vec(vec):
     return vec_reshaped
 
 
-def LDA_dis(IQ_012_data, points, shots=1024, acc=False):
+def discriminator(IQ_012_data, points, shots=1024, acc=False):
 
         # construct vector w/ 0's, 1's and 2's (for testing)
         state_012 = np.zeros(shots) # shots gives number of experiments

@@ -285,7 +285,7 @@ class QuantumCircuit3:
             for i in range(len(results.results)):
                 lul.append(results.get_memory(i)[:, 0])
             lul_reshaped = LDA_discriminator.reshape_complex_vec(lul[0])
-            counts012 = LDA_discriminator.LDA_dis(self.data_disc, lul_reshaped, acc=True)
+            counts012 = LDA_discriminator.discriminator(self.data_disc, lul_reshaped, acc=True)
             return counts012
         else:
             return results
