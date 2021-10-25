@@ -162,21 +162,36 @@ class QuantumCircuit3:
         self.list_schedule.append(pulse.Play(pi_pulse_12, self.drive_chan))
 
 
-    def y_12(self):
+    def sx_12(self):
         """
-        Apply a pi pulse on levels 12
+        Apply a pi/2 pulse on levels 12
+        """
+        pi_half_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
+                                              amp=self.pi_amp_12/2,
+                                              sigma=self.drive_sigma,
+                                              name='sx_12')
+        # make sure this pulse is sidebanded
+        pi_half_pulse_12 = self.apply_sideband(pi_half_pulse_12,
+                                               self.qubit_freq_est_12,
+                                               name='sx_12')
+        self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
+
+    def ry_12(self, angle):
+        """
+        Apply a ry gate on levels 12
+                input: it has to be in randians
         """
         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
         self.list_schedule.append(phase_pi)
-        pi_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_12,
-                                         sigma=self.drive_sigma,
-                                         name='y_12')
+        ry_12 = pulse_lib.gaussian(duration=self.drive_samples,
+                                   amp=self.pi_amp_01*angle/np.pi,
+                                   sigma=self.drive_sigma,
+                                   name='ry_12')
         # make sure this pulse is sidebanded
-        pi_pulse_12 = self.apply_sideband(pi_pulse_12, self.qubit_freq_est_12,
-                                          name="y_12")
-        self.list_schedule.append(pulse.Play(pi_pulse_12, self.drive_chan))
-
+        ry_12 = self.apply_sideband(ry_12,
+                                    self.qubit_freq_est_12,
+                                    name="ry_12")
+        self.list_schedule.append(pulse.Play(ry_12, self.drive_chan))
 
     def rz(self, phase):
         self.list_schedule.append(pulse.ShiftPhase(phase, self.drive_chan))
