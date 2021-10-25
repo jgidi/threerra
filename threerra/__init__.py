@@ -105,11 +105,6 @@ class QuantumCircuit3:
         """
         Apply a pi pulse on levels 01
         """
-#         pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-#                                          amp=self.pi_amp_01,
-#                                          sigma=self.drive_sigma,
-#                                          name='x_01')
-#         self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
         circ = QuantumCircuit(1)
         circ.x(self.qubit)
         transpiled_circ = transpile(circ, self.backend)
@@ -121,11 +116,6 @@ class QuantumCircuit3:
         Apply a rx gate at levels 01
                 input: it has to be in randians
         """
-#         pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-#                                          amp=self.pi_amp_01*angle/np.pi,
-#                                          sigma=self.drive_sigma,
-#                                          name='rx_01')
-#         self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
         circ = QuantumCircuit(1)
         circ.rx(angle, self.qubit)
         transpiled_circ = transpile(circ, self.backend)
