@@ -8,6 +8,8 @@ from qiskit.pulse.library import Waveform
 from qiskit.tools.monitor import job_monitor
 from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 from scipy.optimize import curve_fit
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
 
 
 # Out-of-class helpers
@@ -16,6 +18,44 @@ def closest_multiple(N, base : int = 16):
     Return the closest multiple of 'base' to 'N'
     """
     return base * round( N / base )
+
+
+def reshape_complex_vec(vec):
+    """Take in complex vector vec and return 2d array w/ real, imag entries. This is needed for the learning.
+    Args:
+        vec (list): complex vector of data
+    Returns:
+        list: vector w/ entries given by (real(vec], imag(vec))
+    """
+    length = len(vec)
+    vec_reshaped = np.zeros((length, 2))
+    for i in range(len(vec)):
+        vec_reshaped[i]=[np.real(vec[i]), np.imag(vec[i])]
+    return vec_reshaped
+
+
+def LDA_dis(IQ_012_data, points, shots=1024, acc=False):
+        
+        # construct vector w/ 0's, 1's and 2's (for testing)
+        state_012 = np.zeros(shots) # shots gives number of experiments
+        state_012 = np.concatenate((state_012, np.ones(shots)))
+        state_012 = np.concatenate((state_012, 2*np.ones(shots)))
+        
+        # Shuffle and split data into training and test sets
+        IQ_012_train, IQ_012_test, state_012_train, state_012_test = train_test_split(IQ_012_data, state_012, test_size=0.5)
+        
+        # Set up the LDA
+        LDA_012 = LinearDiscriminantAnalysis()
+        LDA_012.fit(IQ_012_train, state_012_train)
+        
+        if acc==True:
+            score_012 = LDA_012.score(IQ_012_test, state_012_test)
+            print(score_012)
+        
+        counts = LDA_012.predict(points)
+        
+        return counts
+    
 
 class QuantumCircuit3:
     """Create a new circuit for a three-level system."""
@@ -52,7 +92,10 @@ class QuantumCircuit3:
         # 12
         self.qubit_freq_est_12 = self.qubit_freq_est_01 + self.backend_props.qubit_property(self.qubit)['anharmonicity'][0]
         self.pi_amp_12 = 0.2797548240848574
-
+        
+        # data discriminator
+        self.data_disc = np.loadtxt("data_disc.txt")
+        
         # Channels
         self.drive_chan = pulse.DriveChannel(self.qubit)
         self.meas_chan = pulse.MeasureChannel(self.qubit)
@@ -61,7 +104,7 @@ class QuantumCircuit3:
         # Circuit schedule accumulator
         self.list_schedule = []
 
-
+        
     def apply_sideband(self, pulse, freq, name=None):
         """
         Apply a modulation for a signal 'pulse' according to a frequency 'freq'
@@ -74,16 +117,22 @@ class QuantumCircuit3:
         sideband_pulse = Waveform(np.real(pulse.samples) * sine, name)
         return sideband_pulse
 
+    
     def sx_01(self):
         """
         Apply a pi/2 pulse on levels 01
         """
-        pi_half_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_01/2,
-                                         sigma=self.drive_sigma,
-                                         name='sx_01')
-        self.list_schedule.append(pulse.Play(pi_half_pulse_01, self.drive_chan))
+#         pi_half_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
+#                                          amp=self.pi_amp_01/2,
+#                                          sigma=self.drive_sigma,
+#                                          name='sx_01')
+#         self.list_schedule.append(pulse.Play(pi_half_pulse_01, self.drive_chan))
+        circ = QuantumCircuit(1)
+        circ.sx(self.qubit)
+        transpiled_circ = transpile(circ, self.backend)
+        self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
+        
     def sx_12(self):
         """
         Apply a pi/2 pulse on levels 12
@@ -98,6 +147,7 @@ class QuantumCircuit3:
                                                name='sx_12')
         self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
 
+        
     def x_01(self):
         """
         Apply a pi pulse on levels 01
@@ -112,6 +162,7 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
+        
     def rx_01(self, angle):
         """
         Apply a rx gate at levels 01
@@ -127,34 +178,44 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
+        
     def y_01(self):
         """
         Apply a y gate on levels 01
         """
-        phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
-        self.list_schedule.append(phase_pi)
-        y_01 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_01,
-                                         sigma=self.drive_sigma,
-                                         name='y_01')
-        pulse_y_01 = pulse.Play(y_01, self.drive_chan)
-        self.list_schedule.append(pulse_y_01)
+#         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
+#         self.list_schedule.append(phase_pi)
+#         y_01 = pulse_lib.gaussian(duration=self.drive_samples,
+#                                          amp=self.pi_amp_01,
+#                                          sigma=self.drive_sigma,
+#                                          name='y_01')
+#         pulse_y_01 = pulse.Play(y_01, self.drive_chan)
+#         self.list_schedule.append(pulse_y_01)
+        circ = QuantumCircuit(1)
+        circ.y(self.qubit)
+        transpiled_circ = transpile(circ, self.backend)
+        self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
+        
     def ry_01(self, angle):
         """
         Apply a ry gate on levels 01
                 input: it has to be in randians
         """
-        phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
-        self.list_schedule.append(phase_pi)
-        ry_01 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_01*angle/np.pi,
-                                         sigma=self.drive_sigma,
-                                         name='ry_01')
-        pulse_ry_01 = pulse.Play(ry_01, self.drive_chan)
-        self.list_schedule.append(pulse_ry_01)
+#         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
+#         self.list_schedule.append(phase_pi)
+#         ry_01 = pulse_lib.gaussian(duration=self.drive_samples,
+#                                          amp=self.pi_amp_01*angle/np.pi,
+#                                          sigma=self.drive_sigma,
+#                                          name='ry_01')
+#         pulse_ry_01 = pulse.Play(ry_01, self.drive_chan)
+#         self.list_schedule.append(pulse_ry_01)
+        circ = QuantumCircuit(1)
+        circ.ry(angle, self.qubit)
+        transpiled_circ = transpile(circ, self.backend)
+        self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
-
+        
     def x_12(self):
         """
         Apply a pi pulse on levels 12
@@ -183,6 +244,7 @@ class QuantumCircuit3:
                                                name='sx_12')
         self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
 
+
     def ry_12(self, angle):
         """
         Apply a ry gate on levels 12
@@ -191,7 +253,7 @@ class QuantumCircuit3:
         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
         self.list_schedule.append(phase_pi)
         ry_12 = pulse_lib.gaussian(duration=self.drive_samples,
-                                   amp=self.pi_amp_01*angle/np.pi,
+                                   amp=self.pi_amp_12*angle/np.pi,
                                    sigma=self.drive_sigma,
                                    name='ry_12')
         # make sure this pulse is sidebanded
@@ -199,6 +261,23 @@ class QuantumCircuit3:
                                     self.qubit_freq_est_12,
                                     name="ry_12")
         self.list_schedule.append(pulse.Play(ry_12, self.drive_chan))
+       
+    
+    def rx_12(self, angle):
+        """
+        Apply a ry gate on levels 12
+                input: it has to be in randians
+        """
+        
+        rx_12 = pulse_lib.gaussian(duration=self.drive_samples,
+                                   amp=self.pi_amp_12*angle/np.pi,
+                                   sigma=self.drive_sigma,
+                                   name='rx_12')
+        # make sure this pulse is sidebanded
+        rx_12 = self.apply_sideband(rx_12,
+                                    self.qubit_freq_est_12,
+                                    name="rx_12")
+        self.list_schedule.append(pulse.Play(rx_12, self.drive_chan))
 
     def rz(self, phase):
         self.list_schedule.append(pulse.ShiftPhase(phase, self.drive_chan))
@@ -252,6 +331,7 @@ class QuantumCircuit3:
 
         print(f'qubit_freq_est_01 updated from {f0/self.GHz}GHz to {fit_params[0]/self.GHz}GHz.')
 
+        
     def calibrate_pi_amp_01(self, amps=None):
 
         amp0 = self.pi_amp_01
@@ -367,6 +447,7 @@ class QuantumCircuit3:
 
         print(f'qubit_freq_est_12 updated from {f0/self.GHz}GHz to {fit_params[0]/self.GHz}GHz.')
 
+        
     def calibrate_pi_amp_12(self, amps=None):
 
         amp0 = self.pi_amp_12
@@ -431,6 +512,7 @@ class QuantumCircuit3:
 
         print(f'pi_amp_12 updated from {amp0} to {self.pi_amp_12}.')
 
+        
     def draw(self, backend=None, *args, **kwargs):
         """
         Join all pulses and draw
@@ -449,10 +531,12 @@ class QuantumCircuit3:
                              *args,
                              **kwargs)
 
+    
     def run(self,
             shots=1024,
-            meas_level=2,
-            meas_return='avg',
+            meas_level=1,
+            meas_return='single',
+            disc012=False,
             *args, **kwargs):
         """
         Run circuit on backend
@@ -461,19 +545,33 @@ class QuantumCircuit3:
         schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
+        counter = 0
+        while counter < 3:
+            try:
+                job = self.backend.run(schedule,
+                                       shots=shots,
+                                       meas_level=meas_level,
+                                       meas_return=meas_return,
+                                       *args,
+                                       **kwargs)
 
-        job = self.backend.run(schedule,
-                               shots=shots,
-                               meas_level=meas_level,
-                               meas_return=meas_return,
-                               *args,
-                               **kwargs)
-
-        # Make notice about the on-going job
-        job_monitor(job)
+                # Make notice about the on-going job
+                job_monitor(job)
+                break
+            except:
+                counter = counter + 1
         results = job.result(timeout=120)
-        return results
+        if disc012:
+            lul = []
+            for i in range(len(results.results)):
+                lul.append(results.get_memory(i)[:, 0])
+            lul_reshaped = reshape_complex_vec(lul[0])
+            counts012 = LDA_dis(self.data_disc, lul_reshaped, acc=True)
+            return counts012
+        else:
+            return results
 
+    
     def measure(self):
         meas_idx = [self.qubit in group
                         for group in self.backend_config.meas_map].index(True)
@@ -482,3 +580,73 @@ class QuantumCircuit3:
             qubits = self.backend_config.meas_map[meas_idx],
             )
         self.list_schedule.append(measure_pulse)
+
+        
+    def discriminator012(self, shots=1024):
+        
+        pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
+                                         amp=self.pi_amp_01,
+                                         sigma=self.drive_sigma,
+                                         name='x_01')
+    
+        pi_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
+                                         amp=self.pi_amp_12,
+                                         sigma=self.drive_sigma,
+                                         name='x_12')
+        # make sure this pulse is sidebanded
+        pi_pulse_12 = self.apply_sideband(pi_pulse_12, self.qubit_freq_est_12,
+                                          name="x_12")
+        
+        meas_idx = [self.qubit in group
+                        for group in self.backend_config.meas_map].index(True)
+
+        measure_pulse = self.backend_defaults.instruction_schedule_map.get(
+            'measure',
+            qubits = self.backend_config.meas_map[meas_idx],
+            )
+
+        # Create the three schedules
+
+        # Ground state schedule
+        zero_schedule = pulse.Schedule(name="zero schedule")
+        zero_schedule |= measure_pulse
+
+        # Excited state schedule
+        one_schedule = pulse.Schedule(name="one schedule")
+        one_schedule |= pulse.Play(pi_pulse_01, self.drive_chan)
+        one_schedule |= measure_pulse << one_schedule.duration
+
+        # Excited state schedule
+        two_schedule = pulse.Schedule(name="two schedule")
+        two_schedule |= pulse.Play(pi_pulse_01, self.drive_chan)
+        two_schedule |= pulse.Play(pi_pulse_12, self.drive_chan) << two_schedule.duration
+        two_schedule |= measure_pulse << two_schedule.duration
+        
+        IQ_012_job = self.backend.run([zero_schedule, one_schedule, two_schedule],
+                           meas_level=1,
+                           meas_return='single',
+                           shots=shots,
+                           schedule_los=[{self.drive_chan: self.qubit_freq_est_01}] * 3)
+
+        job_monitor(IQ_012_job)
+        
+        # Get job data (single); split for zero, one and two
+
+        job_results = IQ_012_job.result(timeout=120)
+        
+        IQ_012_data = []
+        for i in range(len(job_results.results)):
+            IQ_012_data.append(job_results.get_memory(i)[:, self.qubit])  
+        
+        zero_data = IQ_012_data[0]
+        one_data = IQ_012_data[1]
+        two_data = IQ_012_data[2]
+        
+        # Create IQ vector (split real, imag parts)
+        zero_data_reshaped = reshape_complex_vec(zero_data)
+        one_data_reshaped = reshape_complex_vec(one_data)  
+        two_data_reshaped = reshape_complex_vec(two_data)  
+
+        IQ_012_data_reshaped = np.concatenate((zero_data_reshaped, one_data_reshaped, two_data_reshaped))
+        
+        self.data_disc =  IQ_012_data_reshaped
