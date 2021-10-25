@@ -1,6 +1,12 @@
 import numpy as np
+import qiskit.pulse as pulse
+import qiskit.pulse.library as pulse_lib
+from qiskit.tools.monitor import job_monitor
+
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
+
+from threerra import QuantumCircuit3
 
 def reshape_complex_vec(vec):
     """Take in complex vector vec and return 2d array w/ real, imag entries. This is needed for the learning.
@@ -37,3 +43,72 @@ def LDA_dis(IQ_012_data, points, shots=1024, acc=False):
         counts = LDA_012.predict(points)
 
         return counts
+
+def train_discriminator012(self : QuantumCircuit3, shots=1024):
+
+    pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
+                                     amp=self.pi_amp_01,
+                                     sigma=self.drive_sigma,
+                                     name='x_01')
+
+    pi_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
+                                     amp=self.pi_amp_12,
+                                     sigma=self.drive_sigma,
+                                     name='x_12')
+    # make sure this pulse is sidebanded
+    pi_pulse_12 = self.apply_sideband(pi_pulse_12, self.qubit_freq_est_12,
+                                      name="x_12")
+
+    meas_idx = [self.qubit in group
+                    for group in self.backend_config.meas_map].index(True)
+
+    measure_pulse = self.backend_defaults.instruction_schedule_map.get(
+        'measure',
+        qubits = self.backend_config.meas_map[meas_idx],
+        )
+
+    # Create the three schedules
+
+    # Ground state schedule
+    zero_schedule = pulse.Schedule(name="zero schedule")
+    zero_schedule |= measure_pulse
+
+    # Excited state schedule
+    one_schedule = pulse.Schedule(name="one schedule")
+    one_schedule |= pulse.Play(pi_pulse_01, self.drive_chan)
+    one_schedule |= measure_pulse << one_schedule.duration
+
+    # Excited state schedule
+    two_schedule = pulse.Schedule(name="two schedule")
+    two_schedule |= pulse.Play(pi_pulse_01, self.drive_chan)
+    two_schedule |= pulse.Play(pi_pulse_12, self.drive_chan) << two_schedule.duration
+    two_schedule |= measure_pulse << two_schedule.duration
+
+    IQ_012_job = self.backend.run([zero_schedule, one_schedule, two_schedule],
+                       meas_level=1,
+                       meas_return='single',
+                       shots=shots,
+                       schedule_los=[{self.drive_chan: self.qubit_freq_est_01}] * 3)
+
+    job_monitor(IQ_012_job)
+
+    # Get job data (single); split for zero, one and two
+
+    job_results = IQ_012_job.result(timeout=120)
+
+    IQ_012_data = []
+    for i in range(len(job_results.results)):
+        IQ_012_data.append(job_results.get_memory(i)[:, self.qubit])
+
+    zero_data = IQ_012_data[0]
+    one_data = IQ_012_data[1]
+    two_data = IQ_012_data[2]
+
+    # Create IQ vector (split real, imag parts)
+    zero_data_reshaped = reshape_complex_vec(zero_data)
+    one_data_reshaped = reshape_complex_vec(one_data)
+    two_data_reshaped = reshape_complex_vec(two_data)
+
+    IQ_012_data_reshaped = np.concatenate((zero_data_reshaped, one_data_reshaped, two_data_reshaped))
+
+    self.data_disc =  IQ_012_data_reshaped
