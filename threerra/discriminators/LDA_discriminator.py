@@ -1,12 +1,12 @@
 import numpy as np
 import qiskit.pulse as pulse
-import qiskit.pulse.library as pulse_lib
 from qiskit.tools.monitor import job_monitor
 
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
 
 from threerra import QuantumCircuit3
+from threerra import pulses
 
 def reshape_complex_vec(vec):
     """Take in complex vector vec and return 2d array w/ real, imag entries. This is needed for the learning.
@@ -46,26 +46,10 @@ def discriminator(IQ_012_data, points, shots=1024, acc=False):
 
 def train_discriminator012(self : QuantumCircuit3, shots=1024):
 
-    pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-                                     amp=self.pi_amp_01,
-                                     sigma=self.drive_sigma,
-                                     name='x_01')
-
-    pi_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
-                                     amp=self.pi_amp_12,
-                                     sigma=self.drive_sigma,
-                                     name='x_12')
-    # make sure this pulse is sidebanded
-    pi_pulse_12 = self.apply_sideband(pi_pulse_12, self.qubit_freq_est_12,
-                                      name="x_12")
-
-    meas_idx = [self.qubit in group
-                    for group in self.backend_config.meas_map].index(True)
-
-    measure_pulse = self.backend_defaults.instruction_schedule_map.get(
-        'measure',
-        qubits = self.backend_config.meas_map[meas_idx],
-        )
+    # Pulses
+    pi_pulse_01 = pulses.pi_pulse_01(self)
+    pi_pulse_12 = pulses.pi_pulse_12(self)
+    measure_pulse = pulses.measure(self)
 
     # Create the three schedules
 

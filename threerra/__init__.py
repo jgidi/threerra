@@ -8,8 +8,10 @@ from qiskit.tools.monitor import job_monitor
 from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 
 from threerra.discriminators import LDA_discriminator
-from threerra.tools import closest_multiple
+
+from threerra import pulses
 from threerra.units import ns
+from threerra.tools import closest_multiple
 
 from threerra import calibrations
 
@@ -171,14 +173,7 @@ class QuantumCircuit3:
         """
         Apply a pi pulse on levels 12
         """
-        pi_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_12,
-                                         sigma=self.drive_sigma,
-                                         name='x_12')
-        # make sure this pulse is sidebanded
-        pi_pulse_12 = self.apply_sideband(pi_pulse_12, self.qubit_freq_est_12,
-                                          name="x_12")
-        self.list_schedule.append(pulse.Play(pi_pulse_12, self.drive_chan))
+        self.list_schedule.append(pulse.Play(pulses.pi_pulse_12(self), self.drive_chan))
 
 
     def ry_12(self, angle):
@@ -292,10 +287,4 @@ class QuantumCircuit3:
 
     
     def measure(self):
-        meas_idx = [self.qubit in group
-                        for group in self.backend_config.meas_map].index(True)
-        measure_pulse = self.backend_defaults.instruction_schedule_map.get(
-            'measure',
-            qubits = self.backend_config.meas_map[meas_idx],
-            )
-        self.list_schedule.append(measure_pulse)
+        self.list_schedule.append(pulses.measure(self))
