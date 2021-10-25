@@ -5,7 +5,6 @@ from qiskit.tools.monitor import job_monitor
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
 
-from threerra import QuantumCircuit3
 from threerra import pulses
 
 def reshape_complex_vec(vec):
@@ -44,12 +43,12 @@ def discriminator(IQ_012_data, points, shots=1024, acc=False):
 
         return counts
 
-def train_discriminator012(self : QuantumCircuit3, shots=1024):
+def train_discriminator012(qc3, shots=1024):
 
     # Pulses
-    pi_pulse_01 = pulses.pi_pulse_01(self)
-    pi_pulse_12 = pulses.pi_pulse_12(self)
-    measure_pulse = pulses.measure(self)
+    pi_pulse_01 = pulses.pi_pulse_01(qc3)
+    pi_pulse_12 = pulses.pi_pulse_12(qc3)
+    measure_pulse = pulses.measure(qc3)
 
     # Create the three schedules
 
@@ -59,20 +58,20 @@ def train_discriminator012(self : QuantumCircuit3, shots=1024):
 
     # Excited state schedule
     one_schedule = pulse.Schedule(name="one schedule")
-    one_schedule |= pulse.Play(pi_pulse_01, self.drive_chan)
+    one_schedule |= pulse.Play(pi_pulse_01, qc3.drive_chan)
     one_schedule |= measure_pulse << one_schedule.duration
 
     # Excited state schedule
     two_schedule = pulse.Schedule(name="two schedule")
-    two_schedule |= pulse.Play(pi_pulse_01, self.drive_chan)
-    two_schedule |= pulse.Play(pi_pulse_12, self.drive_chan) << two_schedule.duration
+    two_schedule |= pulse.Play(pi_pulse_01, qc3.drive_chan)
+    two_schedule |= pulse.Play(pi_pulse_12, qc3.drive_chan) << two_schedule.duration
     two_schedule |= measure_pulse << two_schedule.duration
 
-    IQ_012_job = self.backend.run([zero_schedule, one_schedule, two_schedule],
+    IQ_012_job = qc3.backend.run([zero_schedule, one_schedule, two_schedule],
                        meas_level=1,
                        meas_return='single',
                        shots=shots,
-                       schedule_los=[{self.drive_chan: self.qubit_freq_est_01}] * 3)
+                       schedule_los=[{qc3.drive_chan: qc3.qubit_freq_est_01}] * 3)
 
     job_monitor(IQ_012_job)
 
@@ -82,7 +81,7 @@ def train_discriminator012(self : QuantumCircuit3, shots=1024):
 
     IQ_012_data = []
     for i in range(len(job_results.results)):
-        IQ_012_data.append(job_results.get_memory(i)[:, self.qubit])
+        IQ_012_data.append(job_results.get_memory(i)[:, qc3.qubit])
 
     zero_data = IQ_012_data[0]
     one_data = IQ_012_data[1]
@@ -95,4 +94,4 @@ def train_discriminator012(self : QuantumCircuit3, shots=1024):
 
     IQ_012_data_reshaped = np.concatenate((zero_data_reshaped, one_data_reshaped, two_data_reshaped))
 
-    self.data_disc =  IQ_012_data_reshaped
+    qc3.data_disc =  IQ_012_data_reshaped
