@@ -29,7 +29,7 @@ class QuantumCircuit3:
         self.backend_defaults = self.backend.defaults()
 
         # Drive pulse parameters
-        self.drive_sigma_s = 40 * ns           # Width (duration) of gaussian pulses in microseconds # TODO use 80 ns (0.080 us)
+        self.drive_sigma_s = 40 * ns           # Width (duration) of gaussian pulses in microseconds
         self.drive_samples_s = self.drive_sigma_s*4 # Truncate gaussian duration
 
         self.dt = self.backend_config.dt # Device sampling period
