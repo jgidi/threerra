@@ -110,7 +110,7 @@ class QuantumCircuit3:
 
     def rx_01(self, angle):
         """
-        Apply a pi pulse on levels 01
+        Apply a rx gate at levels 01
                 input: it has to be in randians
         """
         pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
@@ -135,17 +135,17 @@ class QuantumCircuit3:
 
     def ry_01(self, angle):
         """
-        Apply a y gate on levels 01
+        Apply a ry gate on levels 01
                 input: it has to be in randians
         """
         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
         self.list_schedule.append(phase_pi)
-        y_01 = pulse_lib.gaussian(duration=self.drive_samples,
+        ry_01 = pulse_lib.gaussian(duration=self.drive_samples,
                                          amp=self.pi_amp_01*angle/np.pi,
                                          sigma=self.drive_sigma,
                                          name='ry_01')
-        pulse_y_01 = pulse.Play(y_01, self.drive_chan)
-        self.list_schedule.append(pulse_y_01)
+        pulse_ry_01 = pulse.Play(ry_01, self.drive_chan)
+        self.list_schedule.append(pulse_ry_01)
 
 
     def x_12(self):
