@@ -6,7 +6,7 @@ import qiskit.pulse as pulse
 import qiskit.pulse.library as pulse_lib
 from qiskit.pulse.library import Waveform
 from qiskit.tools.monitor import job_monitor
-
+from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 from scipy.optimize import curve_fit
 
 
@@ -102,23 +102,30 @@ class QuantumCircuit3:
         """
         Apply a pi pulse on levels 01
         """
-        pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_01,
-                                         sigma=self.drive_sigma,
-                                         name='x_01')
-        self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
+#         pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
+#                                          amp=self.pi_amp_01,
+#                                          sigma=self.drive_sigma,
+#                                          name='x_01')
+#         self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
+        circ = QuantumCircuit(1)
+        circ.x(self.qubit)
+        transpiled_circ = transpile(circ, self.backend)
+        self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
     def rx_01(self, angle):
         """
         Apply a rx gate at levels 01
                 input: it has to be in randians
         """
-        pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-                                         amp=self.pi_amp_01*angle/np.pi,
-                                         sigma=self.drive_sigma,
-                                         name='rx_01')
-        self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
-
+#         pi_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
+#                                          amp=self.pi_amp_01*angle/np.pi,
+#                                          sigma=self.drive_sigma,
+#                                          name='rx_01')
+#         self.list_schedule.append(pulse.Play(pi_pulse_01, self.drive_chan))
+        circ = QuantumCircuit(1)
+        circ.rx(angle, self.qubit)
+        transpiled_circ = transpile(circ, self.backend)
+        self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
     def y_01(self):
         """
