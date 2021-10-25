@@ -78,8 +78,8 @@ class QuantumCircuit3:
         self.backend_defaults = self.backend.defaults()
 
         # Drive pulse parameters
-        self.drive_sigma_s = 75 * self.ns           # Width (duration) of gaussian pulses in microseconds # TODO use 80 ns (0.080 us)
-        self.drive_samples_s = self.drive_sigma_s*8 # Truncate gaussian duration
+        self.drive_sigma_s = 40 * self.ns           # Width (duration) of gaussian pulses in microseconds # TODO use 80 ns (0.080 us)
+        self.drive_samples_s = self.drive_sigma_s*4 # Truncate gaussian duration
 
         self.dt = self.backend_config.dt # Device sampling period
         self.drive_sigma = closest_multiple(self.drive_sigma_s / self.dt, 16)
@@ -336,7 +336,7 @@ class QuantumCircuit3:
 
         amp0 = self.pi_amp_01
         if amps is None:
-            amps = np.linspace(0, 0.75, 75)
+            amps = np.linspace(-0.95, 0.95, 51)
 
         meas_idx = [self.qubit in group
                         for group in self.backend_config.meas_map].index(True)
