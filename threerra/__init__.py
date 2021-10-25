@@ -31,7 +31,7 @@ class QuantumCircuit3:
         self.backend_defaults = self.backend.defaults()
 
         # Drive pulse parameters
-        self.drive_sigma_s = 40 * ns           # Width (duration) of gaussian pulses in microseconds
+        self.drive_sigma_s = 75 * ns           # Width (duration) of gaussian pulses in microseconds
         self.drive_samples_s = self.drive_sigma_s*4 # Truncate gaussian duration
 
         self.dt = self.backend_config.dt # Device sampling period
@@ -45,10 +45,10 @@ class QuantumCircuit3:
         # 12
         self.qubit_freq_est_12 = self.qubit_freq_est_01 + self.backend_props.qubit_property(self.qubit)['anharmonicity'][0]
         self.pi_amp_12 = 0.2797548240848574
-        
+
         # data discriminator
         self.data_disc = np.loadtxt("data_disc.txt")
-        
+
         # Channels
         self.drive_chan = pulse.DriveChannel(self.qubit)
         self.meas_chan = pulse.MeasureChannel(self.qubit)
@@ -57,7 +57,7 @@ class QuantumCircuit3:
         # Circuit schedule accumulator
         self.list_schedule = []
 
-        
+
     def apply_sideband(self, pulse, freq, name=None):
         """
         Apply a modulation for a signal 'pulse' according to a frequency 'freq'
@@ -70,7 +70,7 @@ class QuantumCircuit3:
         sideband_pulse = Waveform(np.real(pulse.samples) * sine, name)
         return sideband_pulse
 
-    
+
     def sx_01(self):
         """
         Apply a pi/2 pulse on levels 01
@@ -85,7 +85,7 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
-        
+
     def sx_12(self):
         """
         Apply a pi/2 pulse on levels 12
@@ -100,7 +100,7 @@ class QuantumCircuit3:
                                                name='sx_12')
         self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
 
-        
+
     def x_01(self):
         """
         Apply a pi pulse on levels 01
@@ -110,7 +110,7 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
-        
+
     def rx_01(self, angle):
         """
         Apply a rx gate at levels 01
@@ -121,7 +121,7 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
-        
+
     def y_01(self):
         """
         Apply a y gate on levels 01
@@ -139,7 +139,7 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
-        
+
     def ry_01(self, angle):
         """
         Apply a ry gate on levels 01
@@ -158,7 +158,7 @@ class QuantumCircuit3:
         transpiled_circ = transpile(circ, self.backend)
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
-        
+
     def x_12(self):
         """
         Apply a pi pulse on levels 12
@@ -182,14 +182,14 @@ class QuantumCircuit3:
                                     self.qubit_freq_est_12,
                                     name="ry_12")
         self.list_schedule.append(pulse.Play(ry_12, self.drive_chan))
-       
-    
+
+
     def rx_12(self, angle):
         """
         Apply a ry gate on levels 12
                 input: it has to be in randians
         """
-        
+
         rx_12 = pulse_lib.gaussian(duration=self.drive_samples,
                                    amp=self.pi_amp_12*angle/np.pi,
                                    sigma=self.drive_sigma,
@@ -216,7 +216,7 @@ class QuantumCircuit3:
 
     def calibrate_pi_amp_12(self, freqs=None):
         calibrations.calibrate_pi_amp_12(self, freqs)
-        
+
     def draw(self, backend=None, *args, **kwargs):
         """
         Join all pulses and draw
@@ -235,7 +235,7 @@ class QuantumCircuit3:
                              *args,
                              **kwargs)
 
-    
+
     def run(self,
             shots=1024,
             meas_level=1,
@@ -275,6 +275,6 @@ class QuantumCircuit3:
         else:
             return results
 
-    
+
     def measure(self):
         self.list_schedule.append(pulses.measure(self))
