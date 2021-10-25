@@ -1,6 +1,38 @@
 #!/usr/bin/env python3
 
+import numpy as np
+
+from qiskit import pulse
 import qiskit.pulse.library as pulse_lib
+
+def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name = None):
+
+    if name is None:
+        name = ''
+
+    # Init pulse
+    schedule = pulse.Schedule(name=name)
+
+    # Possible phase shift
+    if not shift_phase:
+        schedule |= pulse.ShiftPhase(shift_phase, qc3.drive_chan)
+
+    # Rotation and/or frequency shift
+    if ( (not angle) or (not sideband_freq) ):
+        base_pulse = pulse_lib.gaussian(
+            duration=qc3.drive_samples,
+            sigma=qc3.drive_sigma,
+            amp=qc3.pi_amp_01*angle/np.pi,
+            name=name,
+        )
+        if not sideband_freq:
+            base_pulse = qc3.sideband_pulse(base_pulse, sideband_freq,
+                                            name=name)
+
+        schedule |=  pulse.Play(base_pulse, qc3.drive_chan)
+
+    return schedule
+
 
 def measure(qc3):
     meas_idx = [qc3.qubit in group
