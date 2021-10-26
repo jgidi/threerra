@@ -9,6 +9,7 @@ from scipy.optimize import curve_fit
 from threerra.units import MHz, GHz
 
 def calibrate_freq_01(qc3, freqs=None):
+    """Does a frequency sweep to find the 0 -> 1 transition ."""
 
     f0 = qc3.qubit_freq_est_01
     if freqs is None:
@@ -55,9 +56,10 @@ def calibrate_freq_01(qc3, freqs=None):
     qc3.qubit_freq_est_01 = fit_params[0]
 
     print(f'qubit_freq_est_01 updated from {f0/GHz}GHz to {fit_params[0]/GHz}GHz.')
-    
-    
+
+
 def calibrate_pi_amp_01(qc3, amps=None):
+    """Determines the amplitude required for a pulse to realize the Pi (X) gate between levels 0 and 1."""
 
     amp0 = qc3.pi_amp_01
     if amps is None:
@@ -114,6 +116,7 @@ def calibrate_pi_amp_01(qc3, amps=None):
     print(f'pi_amp_01 updated from {amp0} to {qc3.pi_amp_01}.')
 
 def calibrate_freq_12(qc3, freqs=None):
+    """Does a frequency sweep to find the 1 -> 2 transition ."""
 
     f0 = qc3.qubit_freq_est_12
     if freqs is None:
@@ -174,6 +177,7 @@ def calibrate_freq_12(qc3, freqs=None):
 
 
 def calibrate_pi_amp_12(qc3, amps=None):
+    """Determines the amplitude required for a pulse to realize the Pi (X) gate between levels 1 and 2."""
 
     amp0 = qc3.pi_amp_12
     if amps is None:
