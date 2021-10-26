@@ -17,6 +17,12 @@ class QuantumCircuit3:
     """Create a new circuit for a three-level system."""
 
     def __init__(self, backend):
+        """
+        description
+
+            Args:
+                backend: backend provider
+        """
         # Select quantum and clasical memory slots
         self.qubit = 0
         self.mem_slot = 0
@@ -55,6 +61,15 @@ class QuantumCircuit3:
     def apply_sideband(self, pulse, freq, name=None):
         """
         Apply a modulation for a signal 'pulse' according to a frequency 'freq'
+
+            Args:
+                pulse: The pulse of interest
+                freq: Local Oscillator frecuency for which we want to apply the modulation
+                name: Name of the sideband
+
+            Returns:
+                Pulse with a sideband applied (oscillates at difference between freq and self.qubit_freq_est_01)
+
         """
         if name is None:
             name = 'Sideband'
@@ -67,7 +82,7 @@ class QuantumCircuit3:
 
     def sx_01(self):
         """
-        Apply a sx gate on levels 01
+        Apply a SX-gate on the 01 subspace
         """
 #         pi_half_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
 #                                          amp=self.pi_amp_01/2,
@@ -80,24 +95,9 @@ class QuantumCircuit3:
         self.list_schedule.append(build_schedule(transpiled_circ, self.backend))
 
 
-    def sx_12(self):
-        """
-        Apply a sx gate on levels 12
-        """
-        pi_half_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
-                                              amp=self.pi_amp_12/2,
-                                              sigma=self.drive_sigma,
-                                              name='sx_12')
-        # make sure this pulse is sidebanded
-        pi_half_pulse_12 = self.apply_sideband(pi_half_pulse_12,
-                                               self.qubit_freq_est_12,
-                                               name='sx_12')
-        self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
-
-
     def x_01(self):
         """
-        Apply a pi pulse on levels 01
+        Apply a X-gate on the 01 subspace
         """
         circ = QuantumCircuit(1)
         circ.x(self.qubit)
@@ -107,7 +107,7 @@ class QuantumCircuit3:
 
     def rx_01(self, angle):
         """
-        Apply a rx gate on levels 01.
+        Apply a RX-gate on the 01 subspace
         The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
 
                 Args:
@@ -121,7 +121,7 @@ class QuantumCircuit3:
 
     def y_01(self):
         """
-        Apply a y gate on levels 01
+        Apply a Y-gate on the 01 subspace
         """
         circ = QuantumCircuit(1)
         circ.y(self.qubit)
@@ -131,7 +131,7 @@ class QuantumCircuit3:
 
     def ry_01(self, angle):
         """
-        Apply a ry gate on levels 01.
+        Apply a Y-gate on the 01 subspace
         The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
 
                 Args:
@@ -145,15 +145,32 @@ class QuantumCircuit3:
 
     def x_12(self):
         """
-        Apply a pi pulse on levels 12
+        Apply a X-gate on the 12 subspace
         """
         self.list_schedule.append(pulse.Play(pulses.pi_pulse_12(self),
                                              self.drive_chan))
 
+    def sx_12(self):
+        """
+        Apply a SX-gate on the 12 subspace
+        """
+        pi_half_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
+                                              amp=self.pi_amp_12/2,
+                                              sigma=self.drive_sigma,
+                                              name='sx_12')
+        # make sure this pulse is sidebanded
+        pi_half_pulse_12 = self.apply_sideband(pi_half_pulse_12,
+                                               self.qubit_freq_est_12,
+                                               name='sx_12')
+        self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
+        # self.list_schedule.append(pulses.gen_pulse(self,
+        #                                     angle=np.pi/2,
+        #                                     sideband_freq=self.qubit_freq_est_12,
+        #                                     name="sx_12"))
 
     def ry_12(self, angle):
         """
-        Apply a ry gate on levels 12.
+        Apply a RY-gate on the 12 subspace
         The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
 
                 Args:
@@ -174,7 +191,7 @@ class QuantumCircuit3:
 
     def rx_12(self, angle):
         """
-        Apply a rx gate on levels 12.
+        Apply a RX-gate on the 12 subspace
         The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
 
                 Args:
@@ -191,27 +208,60 @@ class QuantumCircuit3:
         self.list_schedule.append(pulse.Play(rx_12, self.drive_chan))
 
     def rz(self, phase):
+        """
+        Apply a Z-gate
+        """
         self.list_schedule.append(pulse.ShiftPhase(phase, self.drive_chan))
 
 
     # Calibrations
     def calibrate_freq_01(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+
+        """
+
         calibrations.calibrate_freq_01(self, freqs)
 
     def calibrate_pi_amp_01(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+        """
         calibrations.calibrate_pi_amp_01(self, freqs)
 
     def calibrate_freq_12(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+        """
         calibrations.calibrate_freq_12(self, freqs)
 
     def calibrate_pi_amp_12(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+        """
         calibrations.calibrate_pi_amp_12(self, freqs)
 
     def draw(self, backend=None, *args, **kwargs):
         """
         Join all pulses and draw
-        """
 
+            Arg:
+                backend: backend provider
+                *args:
+                **kwargs:
+        """
         # Default backend
         if backend is None:
             backend = self.backend
@@ -232,8 +282,13 @@ class QuantumCircuit3:
             *args, **kwargs):
         """
         Run circuit on backend
-        """
 
+            Arg:
+                shots: number of shots
+                meas_return:
+                *args:
+                **kwargs:
+        """
         schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
@@ -248,4 +303,7 @@ class QuantumCircuit3:
         return job
 
     def measure(self):
+        """
+        Add a measurement to the circuit
+        """
         self.list_schedule.append(pulses.measure(self))
