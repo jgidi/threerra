@@ -8,14 +8,13 @@ import qiskit.pulse.library as pulse_lib
 def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name: Optional[str] = None):
     """
     Generates a pulse with given phase, angle and sideband frequency.
-    The parameters must be in radians i.e (pi/s), with s in [0, 2pi].
+    The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
 
         Args:
             qc3: QuantumCircuit3 circuit.
-            shift_phase: The channel that will acquire data.
-            angle: The classical memory slot in which to store the classified readout result.
-            sideband_freq: The fast-access register slot in which to store the classified readout
-                      result for fast feedback.
+            shift_phase: Shift phase angle
+            angle: Amplitude angle for the 0 --> 1 pi, in radians
+            sideband_freq: Sideband Frequency
             name: Name of the pulse.
 
         Returns:
