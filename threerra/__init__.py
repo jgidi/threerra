@@ -45,9 +45,6 @@ class QuantumCircuit3:
         self.qubit_freq_est_12 = self.qubit_freq_est_01 + self.backend_props.qubit_property(self.qubit)['anharmonicity'][0]
         self.pi_amp_12 = 0.2797548240848574
 
-        # data discriminator
-        self.data_disc = np.loadtxt("data_disc.txt")
-
         # Channels
         self.drive_chan = pulse.DriveChannel(self.qubit)
         self.meas_chan = pulse.MeasureChannel(self.qubit)
