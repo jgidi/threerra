@@ -238,9 +238,7 @@ class QuantumCircuit3:
 
     def run(self,
             shots=1024,
-            meas_level=1,
             meas_return='single',
-            disc012=False,
             *args, **kwargs):
         """
         Run circuit on backend
@@ -249,32 +247,15 @@ class QuantumCircuit3:
         schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
-        counter = 0
-        while counter < 3:
-            try:
-                job = self.backend.run(schedule,
-                                       shots=shots,
-                                       meas_level=meas_level,
-                                       meas_return=meas_return,
-                                       *args,
-                                       **kwargs)
 
-                # Make notice about the on-going job
-                job_monitor(job)
-                break
-            except:
-                counter = counter + 1
-        results = job.result(timeout=120)
-        if disc012:
-            lul = []
-            for i in range(len(results.results)):
-                lul.append(results.get_memory(i)[:, 0])
-            lul_reshaped = LDA_discriminator.reshape_complex_vec(lul[0])
-            counts012 = LDA_discriminator.discriminator(self.data_disc, lul_reshaped, acc=True)
-            return counts012
-        else:
-            return results
+        job = self.backend.run(schedule,
+                               shots=shots,
+                               meas_level=1,
+                               meas_return=meas_return,
+                               *args,
+                               **kwargs)
 
+        return job
 
     def measure(self):
         self.list_schedule.append(pulses.measure(self))
