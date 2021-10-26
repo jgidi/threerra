@@ -5,45 +5,36 @@ from qiskit.tools.monitor import job_monitor
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
 
+import numpy as np
 from threerra import pulses
 
-def reshape_complex_vec(vec):
-    """Take in complex vector vec and return 2d array w/ real, imag entries. This is needed for the learning.
-    Args:
-        vec (list): complex vector of data
-    Returns:
-        list: vector w/ entries given by (real(vec], imag(vec))
-    """
-    length = len(vec)
-    vec_reshaped = np.zeros((length, 2))
-    for i in range(len(vec)):
-        vec_reshaped[i]=[np.real(vec[i]), np.imag(vec[i])]
-    return vec_reshaped
+LDA_discriminator_data = np.loadtxt('data_disc.txt')
 
+def discriminator(data, shots=1024, print_acc=False):
 
-def discriminator(IQ_012_data, points, shots=1024, acc=False):
+    points = np.array([[np.real(dat), np.imag(dat)] for dat in data])
 
-        # construct vector w/ 0's, 1's and 2's (for testing)
-        state_012 = np.zeros(shots) # shots gives number of experiments
-        state_012 = np.concatenate((state_012, np.ones(shots)))
-        state_012 = np.concatenate((state_012, 2*np.ones(shots)))
+    # construct vector w/ 0's, 1's and 2's (for testing)
+    state_012 = np.zeros(shots) # shots gives number of experiments
+    state_012 = np.concatenate((state_012, np.ones(shots)))
+    state_012 = np.concatenate((state_012, 2*np.ones(shots)))
 
-        # Shuffle and split data into training and test sets
-        IQ_012_train, IQ_012_test, state_012_train, state_012_test = train_test_split(IQ_012_data, state_012, test_size=0.5)
+    # Shuffle and split data into training and test sets
+    IQ_012_train, IQ_012_test, state_012_train, state_012_test = train_test_split(LDA_discriminator_data, state_012, test_size=0.5)
 
-        # Set up the LDA
-        LDA_012 = LinearDiscriminantAnalysis()
-        LDA_012.fit(IQ_012_train, state_012_train)
+    # Set up the LDA
+    LDA_012 = LinearDiscriminantAnalysis()
+    LDA_012.fit(IQ_012_train, state_012_train)
 
-        if acc==True:
-            score_012 = LDA_012.score(IQ_012_test, state_012_test)
-            print(score_012)
+    if print_acc==True:
+        score_012 = LDA_012.score(IQ_012_test, state_012_test)
+        print(score_012)
 
-        counts = LDA_012.predict(points)
+    counts = np.round(LDA_012.predict(points)).astype(int)
 
-        return counts
+    return counts
 
-def train_discriminator012(qc3, shots=1024):
+def train_discriminator(qc3, shots=1024):
 
     # Pulses
     pi_pulse_01 = pulses.pi_pulse_01(qc3)
@@ -76,22 +67,14 @@ def train_discriminator012(qc3, shots=1024):
     job_monitor(IQ_012_job)
 
     # Get job data (single); split for zero, one and two
+    result = IQ_012_job.result(timeout=120)
 
-    job_results = IQ_012_job.result(timeout=120)
+    IQ_012_data = np.concatenate([result.get_memory(i)[:, qc3.qubit]
+                                  for i in range(len(result.results))])
 
-    IQ_012_data = []
-    for i in range(len(job_results.results)):
-        IQ_012_data.append(job_results.get_memory(i)[:, qc3.qubit])
+    # Reorder as real pairs
+    IQ_012_data = np.array([np.real(dat), np.imag(dat)]
+                           for dat in IQ_012_data)
 
-    zero_data = IQ_012_data[0]
-    one_data = IQ_012_data[1]
-    two_data = IQ_012_data[2]
-
-    # Create IQ vector (split real, imag parts)
-    zero_data_reshaped = reshape_complex_vec(zero_data)
-    one_data_reshaped = reshape_complex_vec(one_data)
-    two_data_reshaped = reshape_complex_vec(two_data)
-
-    IQ_012_data_reshaped = np.concatenate((zero_data_reshaped, one_data_reshaped, two_data_reshaped))
-
-    qc3.data_disc =  IQ_012_data_reshaped
+    global LDA_discriminator_data
+    LDA_discriminator_data = IQ_012_data

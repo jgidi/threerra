@@ -20,7 +20,7 @@ def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name = None):
         schedule |= pulse.ShiftPhase(shift_phase, qc3.drive_chan)
 
     # Rotation and/or frequency shift
-    if ( (not angle) or (not sideband_freq) ):
+    if (not angle) or (not sideband_freq):
         base_pulse = pulse_lib.gaussian(
             duration=qc3.drive_samples,
             sigma=qc3.drive_sigma,

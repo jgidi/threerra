@@ -4,7 +4,6 @@ import numpy as np
 import qiskit.pulse as pulse
 import qiskit.pulse.library as pulse_lib
 from qiskit.pulse.library import Waveform
-from qiskit.tools.monitor import job_monitor
 from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 
 from threerra.discriminators import LDA_discriminator
@@ -45,9 +44,6 @@ class QuantumCircuit3:
         # 12
         self.qubit_freq_est_12 = self.qubit_freq_est_01 + self.backend_props.qubit_property(self.qubit)['anharmonicity'][0]
         self.pi_amp_12 = 0.2797548240848574
-
-        # data discriminator
-        self.data_disc = np.loadtxt("data_disc.txt")
 
         # Channels
         self.drive_chan = pulse.DriveChannel(self.qubit)
@@ -238,9 +234,7 @@ class QuantumCircuit3:
 
     def run(self,
             shots=1024,
-            meas_level=1,
             meas_return='single',
-            disc012=False,
             *args, **kwargs):
         """
         Run circuit on backend
@@ -249,32 +243,15 @@ class QuantumCircuit3:
         schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
-        counter = 0
-        while counter < 3:
-            try:
-                job = self.backend.run(schedule,
-                                       shots=shots,
-                                       meas_level=meas_level,
-                                       meas_return=meas_return,
-                                       *args,
-                                       **kwargs)
 
-                # Make notice about the on-going job
-                job_monitor(job)
-                break
-            except:
-                counter = counter + 1
-        results = job.result(timeout=120)
-        if disc012:
-            lul = []
-            for i in range(len(results.results)):
-                lul.append(results.get_memory(i)[:, 0])
-            lul_reshaped = LDA_discriminator.reshape_complex_vec(lul[0])
-            counts012 = LDA_discriminator.discriminator(self.data_disc, lul_reshaped, acc=True)
-            return counts012
-        else:
-            return results
+        job = self.backend.run(schedule,
+                               shots=shots,
+                               meas_level=1,
+                               meas_return=meas_return,
+                               *args,
+                               **kwargs)
 
+        return job
 
     def measure(self):
         self.list_schedule.append(pulses.measure(self))
