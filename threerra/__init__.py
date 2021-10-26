@@ -4,7 +4,6 @@ import numpy as np
 import qiskit.pulse as pulse
 import qiskit.pulse.library as pulse_lib
 from qiskit.pulse.library import Waveform
-from qiskit.tools.monitor import job_monitor
 from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 
 from threerra.discriminators import LDA_discriminator
