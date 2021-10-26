@@ -19,7 +19,7 @@ def load_datafile():
         lda_discriminator_data = np.load(datapath)
     except FileNotFoundError:
         print("Data file not found.\
-        \nRegenerate it with 'threerra.discriminators.nearest_discriminator.train_discriminator(qc : QuantumCircuit3)'")
+        \nRegenerate it with 'threerra.discriminators.LDA_discriminator.train_discriminator(qc : QuantumCircuit3)'")
 
 def train_discriminator(qc3, shots=1024):
 
