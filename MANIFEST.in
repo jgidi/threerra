@@ -1,0 +1,3 @@
+include README.md
+include data_disc.txt
+include threerra/discriminators/nearest_discriminator_data.npy
