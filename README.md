@@ -47,5 +47,5 @@ python -m pip uninstall threerra
 
 As expressed on the `LICENCE` file, we make use of the permissive Apache License 2.0.
 
-Also, this project makes use of several well known python libraries; [qiskit](https://qiskit.org/), [numpy](https://numpy.org/), [sklearn](https://qiskit.org/), [spicy](https://www.scipy.org/) and [matplotlib](https://matplotlib.org/). We want to acknowledge their developers and express full compliment to their respective licenses.
+Also, this project makes use of several well known python libraries; [qiskit](https://qiskit.org/), [numpy](https://numpy.org/), [sklearn](https://qiskit.org/), [scipy](https://www.scipy.org/) and [matplotlib](https://matplotlib.org/). We want to acknowledge their developers and express full compliment to their respective licenses.
 
