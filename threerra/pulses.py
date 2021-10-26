@@ -13,7 +13,7 @@ def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name: Optional[str] 
         Args:
             qc3: QuantumCircuit3 circuit.
             shift_phase: Shift phase angle
-            angle: Amplitude angle for the 0 --> 1 pi, in radians
+            angle: Angle of rotation, in radians
             sideband_freq: Sideband Frequency
             name: Name of the pulse.
 
