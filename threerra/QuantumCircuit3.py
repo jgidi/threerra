@@ -67,7 +67,7 @@ class QuantumCircuit3:
 
     def sx_01(self):
         """
-        Apply a pi/2 pulse on levels 01
+        Apply a sx gate on levels 01
         """
 #         pi_half_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
 #                                          amp=self.pi_amp_01/2,
@@ -82,7 +82,7 @@ class QuantumCircuit3:
 
     def sx_12(self):
         """
-        Apply a pi/2 pulse on levels 12
+        Apply a sx gate on levels 12
         """
         pi_half_pulse_12 = pulse_lib.gaussian(duration=self.drive_samples,
                                               amp=self.pi_amp_12/2,
@@ -107,8 +107,11 @@ class QuantumCircuit3:
 
     def rx_01(self, angle):
         """
-        Apply a rx gate at levels 01
-                input: it has to be in randians
+        Apply a rx gate on levels 01.
+        The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
+
+                Args:
+                    angle: angle desired for the rotation.
         """
         circ = QuantumCircuit(1)
         circ.rx(angle, self.qubit)
@@ -120,14 +123,6 @@ class QuantumCircuit3:
         """
         Apply a y gate on levels 01
         """
-#         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
-#         self.list_schedule.append(phase_pi)
-#         y_01 = pulse_lib.gaussian(duration=self.drive_samples,
-#                                          amp=self.pi_amp_01,
-#                                          sigma=self.drive_sigma,
-#                                          name='y_01')
-#         pulse_y_01 = pulse.Play(y_01, self.drive_chan)
-#         self.list_schedule.append(pulse_y_01)
         circ = QuantumCircuit(1)
         circ.y(self.qubit)
         transpiled_circ = transpile(circ, self.backend)
@@ -136,17 +131,12 @@ class QuantumCircuit3:
 
     def ry_01(self, angle):
         """
-        Apply a ry gate on levels 01
-                input: it has to be in randians
+        Apply a ry gate on levels 01.
+        The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
+
+                Args:
+                    angle: angle desired for the rotation.
         """
-#         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
-#         self.list_schedule.append(phase_pi)
-#         ry_01 = pulse_lib.gaussian(duration=self.drive_samples,
-#                                          amp=self.pi_amp_01*angle/np.pi,
-#                                          sigma=self.drive_sigma,
-#                                          name='ry_01')
-#         pulse_ry_01 = pulse.Play(ry_01, self.drive_chan)
-#         self.list_schedule.append(pulse_ry_01)
         circ = QuantumCircuit(1)
         circ.ry(angle, self.qubit)
         transpiled_circ = transpile(circ, self.backend)
@@ -157,13 +147,17 @@ class QuantumCircuit3:
         """
         Apply a pi pulse on levels 12
         """
-        self.list_schedule.append(pulse.Play(pulses.pi_pulse_12(self), self.drive_chan))
+        self.list_schedule.append(pulse.Play(pulses.pi_pulse_12(self),
+                                             self.drive_chan))
 
 
     def ry_12(self, angle):
         """
-        Apply a ry gate on levels 12
-                input: it has to be in randians
+        Apply a ry gate on levels 12.
+        The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
+
+                Args:
+                    angle: angle desired for the rotation.
         """
         phase_pi = pulse.ShiftPhase(np.pi, self.drive_chan)
         self.list_schedule.append(phase_pi)
@@ -180,10 +174,12 @@ class QuantumCircuit3:
 
     def rx_12(self, angle):
         """
-        Apply a ry gate on levels 12
-                input: it has to be in randians
-        """
+        Apply a rx gate on levels 12.
+        The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
 
+                Args:
+                    angle: angle desired for the rotation.
+        """
         rx_12 = pulse_lib.gaussian(duration=self.drive_samples,
                                    amp=self.pi_amp_12*angle/np.pi,
                                    sigma=self.drive_sigma,
