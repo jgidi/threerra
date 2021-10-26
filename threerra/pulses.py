@@ -6,6 +6,8 @@ from qiskit import pulse
 import qiskit.pulse.library as pulse_lib
 
 def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name = None):
+    """Generates a pulse with given phase, angle and sideband frequency,
+    where the input phase must be in radians i.e (pi/s) s in [0, 2pi]"""
 
     if name is None:
         name = ''
@@ -35,6 +37,7 @@ def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name = None):
 
 
 def measure(qc3):
+    """Measures the quantum circuit, collapsing it in each count to a specific value."""
     meas_idx = [qc3.qubit in group
                        for group in qc3.backend_config.meas_map].index(True)
 
