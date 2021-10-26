@@ -18,10 +18,10 @@ class QuantumCircuit3:
 
     def __init__(self, backend):
         """
-        Descripción
+        description
 
             Args:
-                backend:
+                backend: backend provider
         """
         # Select quantum and clasical memory slots
         self.qubit = 0
@@ -63,11 +63,12 @@ class QuantumCircuit3:
         Apply a modulation for a signal 'pulse' according to a frequency 'freq'
 
             Args:
-                pulse:
-                freq:
-                name:
+                pulse: The pulse of interest
+                freq: Local Oscillator frecuency for which we want to apply the modulation
+                name: Name of the sideband
 
             Returns:
+                Pulse with a sideband applied (oscillates at difference between freq and self.qubit_freq_est_01)
 
         """
         if name is None:
@@ -215,22 +216,52 @@ class QuantumCircuit3:
 
     # Calibrations
     def calibrate_freq_01(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+
+        """
+
         calibrations.calibrate_freq_01(self, freqs)
 
     def calibrate_pi_amp_01(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+        """
         calibrations.calibrate_pi_amp_01(self, freqs)
 
     def calibrate_freq_12(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+        """
         calibrations.calibrate_freq_12(self, freqs)
 
     def calibrate_pi_amp_12(self, freqs=None):
+        """
+        description
+
+            Args:
+                freqs:
+        """
         calibrations.calibrate_pi_amp_12(self, freqs)
 
     def draw(self, backend=None, *args, **kwargs):
         """
         Join all pulses and draw
-        """
 
+            Arg:
+                backend: backend provider
+                *args:
+                **kwargs:
+        """
         # Default backend
         if backend is None:
             backend = self.backend
@@ -251,8 +282,13 @@ class QuantumCircuit3:
             *args, **kwargs):
         """
         Run circuit on backend
-        """
 
+            Arg:
+                shots: number of shots
+                meas_return:
+                *args:
+                **kwargs:
+        """
         schedule = pulse.Schedule()
         for s in self.list_schedule:
             schedule |= s << schedule.duration
@@ -267,4 +303,7 @@ class QuantumCircuit3:
         return job
 
     def measure(self):
+        """
+        Add a measurement to the circuit
+        """
         self.list_schedule.append(pulses.measure(self))
