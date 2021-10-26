@@ -13,6 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url='https://github.com/jgidi/threerra',
     license='Apache Licence 2.0',
-    packages=['threerra'],
+    packages=['threerra', 'threerra.discriminators'],
     install_requires=['qiskit', 'numpy', 'scipy', 'matplotlib', 'sklearn'],
+    include_package_data=True,
 )

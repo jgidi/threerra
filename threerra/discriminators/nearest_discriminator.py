@@ -14,8 +14,9 @@ def load_datafile():
     global nearest_discriminator_data
     try:
         nearest_discriminator_data = np.load(datapath)
-    except:
-        print("Data file not found. Regenerate it with 'train_discriminator(qc : QuantumCircuit3)'")
+    except FileNotFoundError:
+        print("Data file not found.\
+        \nRegenerate it with 'threerra.discriminators.nearest_discriminator.train_discriminator(qc : QuantumCircuit3)'")
 
 
 def train_discriminator(qc3, shots=1024):
