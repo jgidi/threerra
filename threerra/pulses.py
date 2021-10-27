@@ -95,7 +95,7 @@ def pi_pulse_12(qc3):
             qc3: QuantumCircuit3 circuit.
 
         Returns:
-            Generated 0--> 2 pi pulse.
+            Generated 0 --> 2 pi pulse.
     """
 
     pulse = pulse_lib.gaussian(duration=qc3.drive_samples,
