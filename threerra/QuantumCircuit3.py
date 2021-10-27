@@ -84,11 +84,6 @@ class QuantumCircuit3:
         """
         Apply a SX-gate on the 01 subspace
         """
-#         pi_half_pulse_01 = pulse_lib.gaussian(duration=self.drive_samples,
-#                                          amp=self.pi_amp_01/2,
-#                                          sigma=self.drive_sigma,
-#                                          name='sx_01')
-#         self.list_schedule.append(pulse.Play(pi_half_pulse_01, self.drive_chan))
         circ = QuantumCircuit(1)
         circ.sx(self.qubit)
         transpiled_circ = transpile(circ, self.backend)
@@ -163,10 +158,6 @@ class QuantumCircuit3:
                                                self.qubit_freq_est_12,
                                                name='sx_12')
         self.list_schedule.append(pulse.Play(pi_half_pulse_12, self.drive_chan))
-        # self.list_schedule.append(pulses.gen_pulse(self,
-        #                                     angle=np.pi/2,
-        #                                     sideband_freq=self.qubit_freq_est_12,
-        #                                     name="sx_12"))
 
     def ry_12(self, angle):
         """
