@@ -6,15 +6,15 @@ This repository holds the in-development source code implementation for [the thr
 
 ### Motivation and intention
 
-The Qiskit Terra module provides the necessary tools to compose quantum programs at the level of quantum circuits and pulses. While hardware and pulses allow to access higher-level systems, the circuit composer is currently limited to two-levels systems (qubits).
+The Qiskit Terra module provides the necessary tools to compose quantum programs at the level of quantum circuits and pulses. While pulses allow to access hardware as higher-level systems, the circuit composer is currently limited to two-levels systems (qubits).
 
-Our goal is to create a module called ***threerra***, to allow users to both create unitary operations acting onto three-level systems (qutrits) using Qiskit Pulse and execute them on real hardware available through the IBM Quantum platform.
+Our goal is to create a module called ***threerra***, to allow users to both create unitary operations acting onto three-level systems (qutrits) using Qiskit Pulse and to execute them on real hardware available through the IBM Quantum platform.
 
 ## Example notebooks
 
 ### Can I see some examples of this package in action?
 
-Some jupyter notebooks with examples using `threerra` are contained in the folder `Example_notebooks/`. Remember to have `threerra` installed in your system before running the notebooks!
+Some jupyter notebooks with examples using `threerra` are contained in the folder `Example_notebooks/`. Remember to have `threerra` installed on your system before running the notebooks!
 
 ### Can I download the example notebooks to experiment locally?
 
@@ -39,7 +39,7 @@ python -m pip install git+https://github.com/jgidi/threerra
     
 ### Uninstallation
 
-Similarly, the `threerra` package can be uninstalled as
+In the same manner, the `threerra` package can be uninstalled as
 
 ```sh
 pip uninstall threerra
@@ -55,5 +55,4 @@ python -m pip uninstall threerra
 
 As expressed on the `LICENCE` file, we make use of the permissive Apache License 2.0.
 
-Also, this project makes use of several well known python libraries; [qiskit](https://qiskit.org/), [numpy](https://numpy.org/), [sklearn](https://qiskit.org/), [scipy](https://www.scipy.org/) and [matplotlib](https://matplotlib.org/). We want to acknowledge their developers and express full compliment to their respective licenses.
-
+Also, this project makes use of several well known python libraries; [qiskit](https://qiskit.org/), [numpy](https://numpy.org/), [sklearn](https://qiskit.org/), [scipy](https://www.scipy.org/) and [matplotlib](https://matplotlib.org/). We acknowledge their developers and express full compliment to their respective licenses.
