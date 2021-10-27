@@ -21,7 +21,7 @@ class QuantumCircuit3:
         description
 
             Args:
-                backend: backend provider
+                backend: Backend to execute circuits on.
         """
         # Select quantum and clasical memory slots
         self.qubit = 0
@@ -208,39 +208,37 @@ class QuantumCircuit3:
     # Calibrations
     def calibrate_freq_01(self, freqs=None):
         """
-        description
+        Does a frequency sweep to calibrate the 0 --> 1 transition frequency.
 
             Args:
-                freqs:
-
+                freqs:Numpy array of frequencies to sweep
         """
-
         calibrations.calibrate_freq_01(self, freqs)
 
     def calibrate_pi_amp_01(self, freqs=None):
         """
-        description
+        Does a Rabi experiment to compute the 0 --> 1 pi pulse amplitude.
 
             Args:
-                freqs:
+                freqs: Numpy array of amplitudes to to iterate over
         """
         calibrations.calibrate_pi_amp_01(self, freqs)
 
     def calibrate_freq_12(self, freqs=None):
         """
-        description
+        Does a frequency sweep to calibrate the 1 --> 2 transition frequency.
 
             Args:
-                freqs:
+                freqs: Numpy array of frequencies to sweep
         """
         calibrations.calibrate_freq_12(self, freqs)
 
     def calibrate_pi_amp_12(self, freqs=None):
         """
-        description
+        Does a Rabi experiment to compute the 1 --> 2 pi pulse amplitude using the sideband method.
 
             Args:
-                freqs:
+                freqs: Numpy array of amplitudes to to iterate over
         """
         calibrations.calibrate_pi_amp_12(self, freqs)
 
@@ -276,7 +274,10 @@ class QuantumCircuit3:
 
             Arg:
                 shots: number of shots
-                meas_return:
+                meas_return: Level of measurement data for the backend to return.
+                        For ``meas_level`` 0 and 1:
+                    * ``single`` returns information from every shot.
+                    * ``avg`` returns average measurement output (averaged over number of shots).
                 *args:
                 **kwargs:
         """
@@ -290,7 +291,6 @@ class QuantumCircuit3:
                                meas_return=meas_return,
                                *args,
                                **kwargs)
-
         return job
 
     def measure(self):
