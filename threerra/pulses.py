@@ -5,21 +5,19 @@ import numpy as np
 from qiskit import pulse
 import qiskit.pulse.library as pulse_lib
 
-def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name = None):
+def gen_pulse_01(qc3, shift_phase=0, angle=0, name = None):
     """
-    Generates a pulse with given phase, angle and sideband frequency.
-    The angle parameter must be in radians i.e (pi/s), with s in [0, 2pi].
+    Generates a pulse schedule with a given initial phase and some angle acting on the 01 subspace.
 
         Args:
             qc3: QuantumCircuit3 circuit.
             shift_phase: Shift phase angle
             angle: Angle of rotation, in radians
-            sideband_freq: Sideband Frequency
             name: Name of the pulse.
 
         Returns:
-            Generated pulse with the desired parameters.
-            
+            Generated pulse schedule with the desired shift_phase and angle.
+
      """
 
     if name is None:
@@ -33,16 +31,54 @@ def gen_pulse(qc3, shift_phase=0, angle=0, sideband_freq=0, name = None):
         schedule |= pulse.ShiftPhase(shift_phase, qc3.drive_chan)
 
     # Rotation and/or frequency shift
-    if (not angle) or (not sideband_freq):
+    if not angle:
         base_pulse = pulse_lib.gaussian(
             duration=qc3.drive_samples,
             sigma=qc3.drive_sigma,
             amp=qc3.pi_amp_01*angle/np.pi,
             name=name,
         )
-        if not sideband_freq:
-            base_pulse = qc3.sideband_pulse(base_pulse, sideband_freq,
-                                            name=name)
+
+        schedule |=  pulse.Play(base_pulse, qc3.drive_chan)
+
+    return schedule
+
+
+def gen_pulse_12(qc3, shift_phase=0, angle=0, name = None):
+    """
+    Generates a pulse schedule with a given initial phase and some angle acting on the 12 subspace.
+
+        Args:
+            qc3: QuantumCircuit3 circuit.
+            shift_phase: Shift phase angle
+            angle: Angle of rotation, in radians
+            name: Name of the pulse.
+
+        Returns:
+            Generated pulse schedule with the desired shift_phase and angle.
+
+     """
+
+    if name is None:
+        name = ''
+
+    # Init pulse
+    schedule = pulse.Schedule(name=name)
+
+    # Possible phase shift
+    if not shift_phase:
+        schedule |= pulse.ShiftPhase(shift_phase, qc3.drive_chan)
+
+    # Rotation and/or frequency shift
+    if not angle:
+        base_pulse = pulse_lib.gaussian(
+            duration=qc3.drive_samples,
+            sigma=qc3.drive_sigma,
+            amp=qc3.pi_amp_12*angle/np.pi,
+            name=name,
+        )
+        base_pulse = qc3.sideband_pulse(base_pulse, qc3.qubit_freq_est_12,
+                                        name=name)
 
         schedule |=  pulse.Play(base_pulse, qc3.drive_chan)
 
