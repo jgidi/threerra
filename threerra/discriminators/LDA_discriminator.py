@@ -60,11 +60,11 @@ def train_discriminator(qc3, shots=1024):
                                    for i in range(len(results.results))])
 
     # Reorder as real pairs
-    results_data = np.array([np.real(dat), np.imag(dat)]
-                            for dat in results_data)
+    results_data_pairs = np.array([[np.real(dat), np.imag(dat)]
+                             for dat in results_data])
 
     global lda_discriminator_data
-    lda_discriminator_data = results_data
+    lda_discriminator_data = results_data_pairs
 
     np.save(datapath, lda_discriminator_data)
 
@@ -72,7 +72,7 @@ def train_discriminator(qc3, shots=1024):
 
     # Estimate accuracy
     references = np.concatenate((np.zeros(shots), np.ones(shots), 2*np.ones(shots)))
-    values = discriminator(np.concatenate(results_data))
+    values = discriminator(results_data)
 
     accuracy = np.mean(references == values)
     print(f'Discriminator achieved an accuracy of {round(100*accuracy, 2)}% after training.')
