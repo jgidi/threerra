@@ -44,7 +44,7 @@ class QuantumCircuit3:
         # Frequencies and amplitudes for pi-pulses
         # 01
         self.qubit_freq_est_01 = self.backend_defaults.qubit_freq_est[self.qubit]
-        self.pi_amp_01 = 0.24999610202069833
+        self.pi_amp_01 = 0.18156399362903947
         # 12
         self.qubit_freq_est_12 = self.qubit_freq_est_01 + self.backend_props.qubit_property(self.qubit)['anharmonicity'][0]
         self.pi_amp_12 = 0.33025991905409463
