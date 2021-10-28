@@ -22,7 +22,10 @@ def load_datafile():
 def train_discriminator(qc3, shots=1024):
 
     # Pulses
-    pi_pulse_01 = pulses.pi_pulse_01(qc3)
+    circ = QuantumCircuit(1)
+    circ.x(qc3.qubit)
+    transpiled_circ = transpile(circ, qc3.backend)
+    pi_pulse_01 = build_schedule(transpiled_circ, qc3.backend)
     pi_pulse_12 = pulses.pi_pulse_12(qc3)
     measure_pulse = pulses.measure(qc3)
 
@@ -32,12 +35,12 @@ def train_discriminator(qc3, shots=1024):
 
     # Schedule to generate E state
     schedule1 = pulse.Schedule()
-    schedule1 |= pulse.Play(pi_pulse_01, qc3.drive_chan)
+    schedule1 |= pi_pulse_01
     schedule1 |= measure_pulse << schedule1.duration
 
     # Schedule to generate F state
     schedule2 = pulse.Schedule()
-    schedule2 |= pulse.Play(pi_pulse_01, qc3.drive_chan)
+    schedule2 |= pi_pulse_01
     schedule2 |= pulse.Play(pi_pulse_12, qc3.drive_chan) << schedule2.duration
     schedule2 |= measure_pulse << schedule2.duration
 

@@ -5,7 +5,7 @@ import qiskit.pulse as pulse
 import qiskit.pulse.library as pulse_lib
 from qiskit.tools.monitor import job_monitor
 from scipy.optimize import curve_fit
-
+from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 from threerra.units import MHz, GHz
 
 def calibrate_freq_01(qc3, freqs=None):
@@ -155,17 +155,20 @@ def calibrate_freq_12(qc3, freqs=None):
                                         sigma=qc3.drive_sigma,
                                         amp=0.3)
 
-    pi_pulse_01 = pulse_lib.gaussian(duration=qc3.drive_samples,
-                                     amp=qc3.pi_amp_01,
-                                     sigma=qc3.drive_sigma,
-                                     name='pi_pulse_01')
-
+#     pi_pulse_01 = pulse_lib.gaussian(duration=qc3.drive_samples,
+#                                      amp=qc3.pi_amp_01,
+#                                      sigma=qc3.drive_sigma,
+#                                      name='pi_pulse_01')
+    circ = QuantumCircuit(1)
+    circ.x(qc3.qubit)
+    transpiled_circ = transpile(circ, qc3.backend)
+    pi_pulse_01 = build_schedule(transpiled_circ, qc3.backend)
     schedules = []          # Accumulator
     for freq in freqs:
         sidebanded_pulse = qc3.apply_sideband(gaussian_pulse, freq)
 
         schedule = pulse.Schedule()
-        schedule |= pulse.Play(pi_pulse_01, qc3.drive_chan)
+        schedule |= pi_pulse_01
         schedule |= pulse.Play(sidebanded_pulse, qc3.drive_chan) << schedule.duration
         schedule |= measure_pulse << schedule.duration
 
@@ -219,10 +222,10 @@ def calibrate_pi_amp_12(qc3, amps=None):
         qubits = qc3.backend_config.meas_map[meas_idx],
         )
 
-    pi_pulse_01 = pulse_lib.gaussian(duration=qc3.drive_samples,
-                                     amp=qc3.pi_amp_01,
-                                     sigma=qc3.drive_sigma,
-                                     name='pi_pulse_01')
+    circ = QuantumCircuit(1)
+    circ.x(qc3.qubit)
+    transpiled_circ = transpile(circ, qc3.backend)
+    pi_pulse_01 = build_schedule(transpiled_circ, qc3.backend)
 
     schedules = []
     for amp in amps:
@@ -234,7 +237,7 @@ def calibrate_pi_amp_12(qc3, amps=None):
 
         # Define schedule
         schedule = pulse.Schedule()
-        schedule |= pulse.Play(pi_pulse_01, qc3.drive_chan)
+        schedule |= pi_pulse_01
         schedule |= pulse.Play(sidebanded_pulse, qc3.drive_chan) << schedule.duration
         schedule |= measure_pulse << schedule.duration
 

@@ -4,6 +4,7 @@ import numpy as np
 
 from qiskit import pulse
 import qiskit.pulse.library as pulse_lib
+from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 
 def gen_pulse_01(qc3, shift_phase=0, angle=0, name = None):
     """
