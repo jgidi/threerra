@@ -2,7 +2,7 @@
 
 import numpy as np
 from qiskit.result import Result
-from threerra.discriminators import nearest_discriminator
+from threerra.discriminators import LDA_discriminator
 
 def closest_multiple(N, base : int = 16):
     """
@@ -12,7 +12,7 @@ def closest_multiple(N, base : int = 16):
 
 
 def get_data(result,
-             discriminator=nearest_discriminator.discriminator,
+             discriminator=LDA_discriminator.discriminator,
              ):
     """
     Get the data of a job result using a user-defined discriminator
