@@ -5,7 +5,6 @@ import numpy as np
 from threerra import pulses
 import qiskit.pulse as pulse
 from qiskit.tools.monitor import job_monitor
-from qiskit import QuantumCircuit, transpile, schedule as build_schedule
 
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
@@ -25,10 +24,7 @@ def load_datafile():
 def train_discriminator(qc3, shots=1024):
 
     # Pulses
-    circ = QuantumCircuit(1)
-    circ.x(qc3.qubit)
-    transpiled_circ = transpile(circ, qc3.backend)
-    pi_pulse_01 = build_schedule(transpiled_circ, qc3.backend)
+    pi_pulse_01 = pulses.pi_pulse_01_sched(qc3)
     pi_pulse_12 = pulses.pi_pulse_12(qc3)
     measure_pulse = pulses.measure(qc3)
 
