@@ -145,3 +145,20 @@ def pi_pulse_12(qc3):
                                name="x_12")
 
     return pulse
+
+def pi_pulse_01_sched(qc3):
+    """
+    Generates a 0 --> 1 pi transition schedule on the given qubits, using previously defined parameters for duration, pi amplitude, etc.
+
+        Args:
+            qc3: QuantumCircuit3 circuit.
+
+        Returns:
+            Generated 0 --> 1 pi transition schedule
+    """
+    circ = QuantumCircuit(1)
+    circ.x(qc3.qubit)
+    transpiled_circ = transpile(circ, qc3.backend)
+    pulse_sched = build_schedule(transpiled_circ, qc3.backend)
+
+    return pulse_sched
