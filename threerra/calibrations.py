@@ -78,7 +78,7 @@ def calibrate_pi_amp_01(qc3, amps=None):
 
     amp0 = qc3.pi_amp_01
     if amps is None:
-        amps = np.linspace(-0.95, 0.95, 51)
+        amps = np.linspace(0, 0.75, 75)
 
     meas_idx = [qc3.qubit in group
                     for group in qc3.backend_config.meas_map].index(True)
