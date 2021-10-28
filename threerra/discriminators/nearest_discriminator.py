@@ -22,7 +22,7 @@ def load_datafile():
 def train_discriminator(qc3, shots=1024):
 
     # Pulses
-    pi_pulse_01 = pulses_pi_pulse_01_sched(qc3)
+    pi_pulse_01 = pulses.pi_pulse_01_sched(qc3)
     pi_pulse_12 = pulses.pi_pulse_12(qc3)
     measure_pulse = pulses.measure(qc3)
 
